@@ -4192,10 +4192,11 @@ public enum Features {
 
         @Override
         void addBlocks() {
-            BlockWaterstone waterstone = (BlockWaterstone) new BlockWaterstone(Material.rock, "chisel:waterstone/waterstone_interior")
-                .setCreativeTab(ChiselTabs.tabStoneChiselBlocks)
-                .setHardness(2.0F)
-                .setResistance(10.0F);
+            BlockWaterstone waterstone = (BlockWaterstone) new BlockWaterstone(
+                Material.rock,
+                "chisel:waterstone/waterstone_interior").setCreativeTab(ChiselTabs.tabStoneChiselBlocks)
+                    .setHardness(2.0F)
+                    .setResistance(10.0F);
             waterstone.carverHelper.addVariation("tile.waterstone.0.desc", 0, "waterstone/cobble");
             waterstone.carverHelper.addVariation("tile.waterstone.1.desc", 1, "waterstone/black");
             waterstone.carverHelper.addVariation("tile.waterstone.2.desc", 2, "waterstone/tiles");
