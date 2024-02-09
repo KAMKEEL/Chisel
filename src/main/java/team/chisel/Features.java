@@ -4192,7 +4192,7 @@ public enum Features {
 
         @Override
         void addBlocks() {
-            BlockWaterstone waterstone = (BlockWaterstone) new BlockWaterstone(Material.rock, "water_still")
+            BlockWaterstone waterstone = (BlockWaterstone) new BlockWaterstone(Material.rock, "chisel:waterstone/waterstone_interior")
                 .setCreativeTab(ChiselTabs.tabStoneChiselBlocks)
                 .setHardness(2.0F)
                 .setResistance(10.0F);
