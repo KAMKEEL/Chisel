@@ -1455,10 +1455,6 @@ public enum Features {
             BlockCarvable glotek = (BlockCarvable) new BlockCarvableGlowie(Material.rock)
                 .setCreativeTab(ChiselTabs.tabOtherChiselBlocks);
 
-            if (!Configurations.allowChiselCrossColors) {
-                glotek.carverHelper.forbidChiseling = true;
-            }
-
             for (int i = 0; i < 16; i++) {
                 glotek.carverHelper.addVariation(
                     "tile.glotek." + i + ".desc",
@@ -2657,10 +2653,6 @@ public enum Features {
         void addBlocks() {
             BlockCarvable neonite = (BlockCarvable) new BlockCarvableGlowie(Material.rock)
                 .setCreativeTab(ChiselTabs.tabOtherChiselBlocks);
-
-            if (!Configurations.allowChiselCrossColors) {
-                neonite.carverHelper.forbidChiseling = true;
-            }
 
             for (int i = 0; i < 16; i++) {
                 neonite.carverHelper.addVariation(
@@ -4302,6 +4294,39 @@ public enum Features {
         @Override
         boolean needsMetaRecipes() {
             return true;
+        }
+    },
+
+    FROGLIGHT {
+
+        @Override
+        void addBlocks() {
+            BlockCarvable froglight = (BlockCarvable) new BlockCarvable()
+                .setCreativeTab(ChiselTabs.tabOtherChiselBlocks)
+                .setHardness(1F)
+                .setLightLevel(1.0F)
+                .setStepSound(Block.soundTypeStone);
+
+            for (int i = 0; i < 10; i++) {
+                froglight.carverHelper.addVariation("tile.froglight." + i + ".desc", i, "froglight/" + i);
+            }
+
+            froglight.carverHelper.registerAll(froglight, "froglight");
+        }
+
+        @Override
+        void addRecipes() {
+            GameRegistry.addRecipe(
+                new ItemStack(ChiselBlocks.froglight, 8, 0),
+                "SGS",
+                "BSB",
+                "SGS",
+                'S',
+                new ItemStack(Blocks.stone, 1, 0),
+                'G',
+                new ItemStack(Items.glowstone_dust, 1),
+                'B',
+                new ItemStack(Items.slime_ball, 1));
         }
     };
 
