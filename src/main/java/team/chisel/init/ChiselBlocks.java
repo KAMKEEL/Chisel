@@ -7,6 +7,8 @@ import team.chisel.Chisel;
 import team.chisel.block.BlockCarvable;
 import team.chisel.block.BlockCarvableBeacon;
 import team.chisel.block.BlockCarvableCarpet;
+import team.chisel.block.BlockCarvableConcreteSlab;
+import team.chisel.block.BlockCarvableConcreteStairs;
 import team.chisel.block.BlockCarvableGlass;
 import team.chisel.block.BlockCarvableGlowstone;
 import team.chisel.block.BlockCarvableIce;
@@ -53,6 +55,7 @@ public final class ChiselBlocks {
     public static final BlockCarvable sandstone = null;
     public static final BlockCarvable sandstone_scribbles = null;
     public static final BlockConcrete concrete = null;
+    public static final BlockCarvableConcreteSlab concrete_slab = null;
     public static final BlockRoadLine road_line = null;
     public static final BlockCarvable iron_block = null;
     public static final BlockCarvable gold_block = null;
@@ -65,6 +68,7 @@ public final class ChiselBlocks {
     public static final BlockCarvable netherrack = null;
     public static final BlockCarvable mossy_cobblestone = null;
     public static final BlockCarvable stonebricksmooth = null;
+    public static final BlockCarvable hardenedClay = null;
     public static final BlockCarvablePane iron_bars = null;
     public static final BlockCarvableIce ice = null;
     public static final BlockCarvableIce ice_pillar = null;
@@ -146,6 +150,7 @@ public final class ChiselBlocks {
     public static BlockCarvableStairs[] limestoneStairs = new BlockCarvableStairs[8];
     public static BlockCarvableIceStairs[] iceStairs = new BlockCarvableIceStairs[8];
     public static BlockCarvablePackedIceStairs[] packediceStairs = new BlockCarvablePackedIceStairs[8];
+    public static BlockCarvableConcreteStairs[] concreteStairs = new BlockCarvableConcreteStairs[6];
 
     public static Block[] torches = new BlockCarvableTorch[16];
 
@@ -171,6 +176,35 @@ public final class ChiselBlocks {
 
     // 1.19, skipped 10 versions but thats fine
     public static final BlockCarvable froglight = null;
+
+    // Backports from Dustrial Decor. Original artists are WDSPC and Evo_94!
+    public static final BlockCarvable lantern = null;
+    public static final BlockCarvable sheetmetal = null;
+
+    // June Additions
+    public static final BlockCarvable moss = null;
+    public static final BlockCarvableCarpet moss_carpet = null;
+    public static final BlockCarvable cobalt = null;
+    public static final BlockCarvable electrum = null;
+    public static final BlockCarvable invar = null;
+    public static final BlockCarvable nickel = null;
+    public static final BlockCarvable platinum = null;
+    public static final BlockCarvable cast_iron = null;
+    public static final BlockCarvable stainless_steel = null;
+    public static final BlockCarvable titanium = null;
+    public static final BlockCarvable tungstensteel = null;
+    public static final BlockCarvable rpp = null;
+    public static final BlockCarvable iridium = null;
+    public static final BlockCarvable osmium = null;
+    public static final BlockCarvable coral = null;
+    public static final BlockCarvable mud = null;
+    public static final BlockCarvable albumblock = null;
+    public static final BlockCarvable albumblock2 = null;
+    public static final BlockCarvable brickCustom2 = null;
+    public static final BlockCarvable brutalism = null;
+    public static final BlockConcrete road = null;
+    public static final BlockCarvable porcelain = null;
+    public static final BlockCarvable alabaster = null;
 
     private ChiselBlocks() {}
 }

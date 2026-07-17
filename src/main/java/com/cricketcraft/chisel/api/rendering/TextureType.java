@@ -6,6 +6,11 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.client.resources.FallbackResourceManager;
+import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.client.resources.IResourcePack;
+import net.minecraft.client.resources.SimpleReloadableResourceManager;
+import net.minecraft.launchwrapper.Launch;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IBlockAccess;
@@ -18,6 +23,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import com.cricketcraft.chisel.api.carving.CarvableHelper;
 import com.cricketcraft.chisel.api.carving.ICarvingVariation;
 
+import cpw.mods.fml.relauncher.FMLLaunchHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import team.chisel.ctmlib.CTM;
@@ -90,9 +96,9 @@ public enum TextureType {
 			TextureSubmap map = data.getLeft();
 			if (topConnected && botConnected)
 				return map.getSubIcon(0, 1);
-			if (topConnected && !botConnected)
+			if (topConnected)
 				return map.getSubIcon(1, 1);
-			if (!topConnected && botConnected)
+			if (botConnected)
 				return map.getSubIcon(1, 0);
 			return map.getSubIcon(0, 0);
 		}
@@ -100,11 +106,9 @@ public enum TextureType {
 		@Override
 		@SideOnly(Side.CLIENT)
 		protected RenderBlocks createRenderContext(RenderBlocks rendererOld, IBlockAccess world, Object cachedObject) {
-            TextureType.initStatics();
 			RenderBlocksColumn ret = theRenderBlocksColumn.get();
 			Pair<TextureSubmap, IIcon> data = (Pair<TextureSubmap, IIcon>) cachedObject;
 
-			ret.blockAccess = world;
 			ret.renderMaxX = 1.0;
 			ret.renderMaxY = 1.0;
 			ret.renderMaxZ = 1.0;
@@ -206,15 +210,12 @@ public enum TextureType {
 		@Override
 		@SideOnly(Side.CLIENT)
 		protected RenderBlocks createRenderContext(RenderBlocks rendererOld, IBlockAccess world, Object cachedObject) {
-            TextureType.initStatics();
 			RenderBlocksCTM ret = theRenderBlocksCTM.get();
 			Triple<?, TextureSubmap, TextureSubmap> data = (Triple<?, TextureSubmap, TextureSubmap>) cachedObject;
-			ret.blockAccess = world;
 
 			ret.submap = data.getMiddle();
 			ret.submapSmall = data.getRight();
 
-			ret.rendererOld = rendererOld;
 			return ret;
 		}
 	},
@@ -271,6 +272,8 @@ public enum TextureType {
 	CUSTOM;
 
 	/* Some util stuff for shared code between v* and r* */
+    public static final boolean fixedBottomFaceUV = (boolean) Launch.blackboard
+        .getOrDefault("hodgepodge.FixesConfig.fixBottomFaceUV", Boolean.FALSE);
 
 	public static IIcon getVIcon(TextureType type, TextureSubmap map, int x, int y, int z, int side) {
 		int variationSize = (type == TextureType.V9) ? 3 : 2;
@@ -291,6 +294,9 @@ public enum TextureType {
         //For DOWN, reverse the indexes for only Z
         textureZ = (variationSize - textureZ - 1);
     	}*/
+        else if (side == 0 && fixedBottomFaceUV) {
+            textureX = variationSize - textureX - 1;
+        }
 
 		int index;
 		if (side == 0 || side == 1) {
@@ -326,32 +332,17 @@ public enum TextureType {
 	private static final TextureType[] VALUES;
 	private static final CTM ctm = CTM.getInstance();
 	private static final Random rand = new Random();
-	@SideOnly(Side.CLIENT)
-	private static ThreadLocal<RenderBlocksCTM> theRenderBlocksCTM;
-	@SideOnly(Side.CLIENT)
-	private static ThreadLocal<RenderBlocksColumn> theRenderBlocksColumn;
+	private static final ThreadLocal<RenderBlocksCTM> theRenderBlocksCTM = FMLLaunchHandler.side().isClient() ? ThreadLocal.withInitial(RenderBlocksCTM::new) : null;
+	private static final ThreadLocal<RenderBlocksColumn> theRenderBlocksColumn = FMLLaunchHandler.side().isClient() ? ThreadLocal.withInitial(RenderBlocksColumn::new) : null;
 
-	private String[] suffixes;
+	private final String[] suffixes;
 	static {
 		VALUES = ArrayUtils.subarray(values(), 0, values().length - 1);
 	}
 
-	private TextureType(String... suffixes) {
+	TextureType(String... suffixes) {
 		this.suffixes = suffixes.length == 0 ? new String[] { "" } : suffixes;
 	}
-
-    private static void initStatics() {
-        if (theRenderBlocksCTM == null) {
-            theRenderBlocksCTM = ThreadLocal.withInitial(RenderBlocksCTM::new);
-            theRenderBlocksColumn = ThreadLocal.withInitial(RenderBlocksColumn::new);
-        }
-    }
-
-    @SideOnly(Side.CLIENT)
-    public static void clearStatics() {
-        if(theRenderBlocksCTM != null) theRenderBlocksCTM.remove();
-        if(theRenderBlocksColumn != null) theRenderBlocksColumn.remove();
-    }
 
     public ISubmapManager createManagerFor(ICarvingVariation variation, String texturePath) {
 		return new SubmapManagerDefault(this, variation, texturePath);
@@ -397,11 +388,25 @@ public enum TextureType {
 		return CUSTOM;
 	}
 
-	// This is ugly, but faster than class.getResource
 	private static boolean exists(String modid, String path, String postfix) {
 		ResourceLocation rl = new ResourceLocation(modid, "textures/blocks/" + path + postfix + ".png");
+
+        final IResourceManager resMan = Minecraft.getMinecraft().getResourceManager();
+        if (resMan instanceof SimpleReloadableResourceManager simple) {
+            FallbackResourceManager fallback = (FallbackResourceManager)simple.domainResourceManagers.get(rl.getResourceDomain());
+            if (fallback != null) {
+                for (Object obj : fallback.resourcePacks) {
+                    if (obj instanceof IResourcePack rp && rp.resourceExists(rl)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        // Fallback
 		try {
-			Minecraft.getMinecraft().getResourceManager().getAllResources(rl);
+            resMan.getAllResources(rl);
 			return true;
 		} catch (Throwable t) {
 			return false;
